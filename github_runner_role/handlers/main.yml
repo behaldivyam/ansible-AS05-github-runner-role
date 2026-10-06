@@ -1,0 +1,11 @@
+#SPDX-License-Identifier: MIT-0
+
+# handlers file for github_runner_role
+
+
+---
+- name: Start GitHub Actions runner
+  ansible.builtin.shell:
+    cmd: "sudo -u {{ github_runner_user }} ./start-runner.sh > runner.log 2>&1 &"
+    chdir: "{{ github_runner_dir }}"
+...

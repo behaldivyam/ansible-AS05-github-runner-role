@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# GitHub Actions runner startup script
+# Managed by Ansible
+
+cd "{{ github_runner_dir }}"
+
+exec ./run.sh

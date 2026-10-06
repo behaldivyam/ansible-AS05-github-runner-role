@@ -1,0 +1,20 @@
+#SPDX-License-Identifier: MIT-0
+
+# defaults file for github_runner_role
+
+---
+github_runner_user: githubrunner
+github_runner_dir: /home/githubrunner/actions-runner
+
+github_runner_packages:
+  - curl
+  - tar
+  - git
+
+github_runner_version: "2.336.0"
+github_runner_architecture: "x64"
+github_runner_download_url: "https://github.com/actions/runner/releases/download/v{{ github_runner_version }}/actions-runner-linux-{{ github_runner_architecture }}-{{ github_runner_version }}.tar.gz"
+github_runner_archive: "/tmp/actions-runner-{{ github_runner_version }}.tar.gz"
+github_runner_url: "https://github.com/behaldivyam/ansible-github-runner"
+github_runner_name: "github-runner"
+...

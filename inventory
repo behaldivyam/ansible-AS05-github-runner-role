@@ -1,0 +1,2 @@
+[github_runner]
+github-runner ansible_host=TARGETIP_EC2 ansible_user=ubuntu

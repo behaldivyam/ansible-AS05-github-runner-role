@@ -1,0 +1,83 @@
+#SPDX-License-Identifier: MIT-0
+# tasks file for github_runner_role
+
+---
+- name: Create GitHub Actions runner user
+  ansible.builtin.user:
+    name: "{{ github_runner_user }}"
+    comment: GitHub Actions Runner
+    create_home: true
+    shell: /bin/bash
+
+- name: Install GitHub Actions runner prerequisites on Debian
+  ansible.builtin.apt:
+    name: "{{ github_runner_packages }}"
+    state: present
+    update_cache: true
+  when: ansible_os_family == "Debian"
+
+- name: Install GitHub Actions runner prerequisites on RedHat
+  ansible.builtin.dnf:
+    name: "{{ github_runner_packages }}"
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Create GitHub Actions runner directory
+  ansible.builtin.file:
+    path: "{{ github_runner_dir }}"
+    state: directory
+    owner: "{{ github_runner_user }}"
+    group: "{{ github_runner_user }}"
+    mode: "0755"
+
+- name: Check if GitHub Actions runner archive exists
+  ansible.builtin.stat:
+    path: "{{ github_runner_archive }}"
+  register: github_runner_archive_check
+
+- name: Download GitHub Actions runner
+  ansible.builtin.get_url:
+    url: "{{ github_runner_download_url }}"
+    dest: "{{ github_runner_archive }}"
+    mode: "0644"
+    timeout: 120
+  when: not github_runner_archive_check.stat.exists
+
+- name: Extract GitHub Actions runner
+  ansible.builtin.unarchive:
+    src: "{{ github_runner_archive }}"
+    dest: "{{ github_runner_dir }}"
+    remote_src: true
+    owner: "{{ github_runner_user }}"
+    group: "{{ github_runner_user }}"
+
+- name: Fix GitHub Actions runner ownership
+  ansible.builtin.file:
+    path: "{{ github_runner_dir }}"
+    state: directory
+    owner: "{{ github_runner_user }}"
+    group: "{{ github_runner_user }}"
+    recurse: true
+
+- name: Configure GitHub Actions runner
+  ansible.builtin.command:
+    cmd: >-
+      sudo -u {{ github_runner_user }}
+      ./config.sh
+      --url "{{ github_runner_url }}"
+      --token "{{ github_runner_token }}"
+      --name "{{ github_runner_name }}"
+      --unattended
+    chdir: "{{ github_runner_dir }}"
+    creates: "{{ github_runner_dir }}/.runner"
+
+- name: Deploy GitHub Actions runner startup script
+  ansible.builtin.template:
+    src: start-runner.sh.j2
+    dest: "{{ github_runner_dir }}/start-runner.sh"
+    owner: "{{ github_runner_user }}"
+    group: "{{ github_runner_user }}"
+    mode: "0755"
+  notify: Start GitHub Actions runner
+...
+

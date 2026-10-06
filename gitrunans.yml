@@ -1,0 +1,9 @@
+---
+- name: Setup GitHub Actions self-hosted runner
+  hosts: github_runner
+  become: true
+  gather_facts: true
+
+  roles:
+    - github_runner_role
+...
